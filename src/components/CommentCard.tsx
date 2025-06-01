@@ -14,12 +14,15 @@ export function CommentCard({ comment, onVote }: CommentCardProps) {
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-1">
             <span className="text-sm font-bold text-gray-800">익명</span>
-            <span
-              className={`text-xs px-2 py-1 rounded-full font-semibold text-white
-                ${comment.choice === 'A' ? 'bg-blue-600' : 'bg-red-600'}`}
-            >
-              선택 {comment.choice === 'A' ? 'A' : 'B'}
-            </span>
+            {comment.choice && (
+  <span
+    className={`text-xs px-2 py-1 rounded-full font-semibold text-white
+      ${comment.choice === 'A' ? 'bg-blue-600' : 'bg-red-600'}`}
+  >
+    선택 {comment.choice}
+  </span>
+)}
+
           </div>
           <p className="text-gray-900 leading-snug whitespace-pre-wrap">
             {comment.text}
