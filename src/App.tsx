@@ -9,6 +9,8 @@ import {
   collection,
   onSnapshot,
   addDoc,
+  deleteDoc,
+  doc,
   serverTimestamp,
   query,
   orderBy,
@@ -22,6 +24,12 @@ function App() {
   const [userEmail, setUserEmail] = useState<string | null>(() => {
     return localStorage.getItem('userEmail');
   });
+  const [votedTopics, setVotedTopics] = useState<Record<string, string>>(() => {
+    const stored = localStorage.getItem('votedTopics');
+    return stored ? JSON.parse(stored) : {};
+  });
+  const [likedComments, setLikedComments] = useState<Record<string, boolean>>({});
+  const [favorites, setFavorites] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     const unsubscribe = onSnapshot(
@@ -64,6 +72,25 @@ function App() {
 
   const handleVote = async (topicId: string, choice: 'A' | 'B') => {
     if (!userEmail) return;
+
+    if (votedTopics[topicId] === choice) {
+      const commentToDelete = comments.find(
+        (c) =>
+          c.topicId === topicId &&
+          c.text.startsWith('선택') &&
+          c.author === userEmail &&
+          c.choice === choice
+      );
+      if (commentToDelete) {
+        await deleteDoc(doc(db, 'comments', commentToDelete.id));
+      }
+      const updated = { ...votedTopics };
+      delete updated[topicId];
+      setVotedTopics(updated);
+      localStorage.setItem('votedTopics', JSON.stringify(updated));
+      return;
+    }
+
     await addDoc(collection(db, 'comments'), {
       topicId,
       text: `선택 ${choice}에 투표함`,
@@ -72,9 +99,14 @@ function App() {
       createdAt: serverTimestamp(),
       votes: 0,
     });
+
+    const updated = { ...votedTopics, [topicId]: choice };
+    setVotedTopics(updated);
+    localStorage.setItem('votedTopics', JSON.stringify(updated));
   };
 
   const handleCommentVote = (commentId: string, vote: Vote) => {
+    if (likedComments[commentId]) return;
     setComments(
       comments.map((comment) => {
         if (comment.id === commentId) {
@@ -86,6 +118,7 @@ function App() {
         return comment;
       })
     );
+    setLikedComments({ ...likedComments, [commentId]: true });
   };
 
   const handleAddComment = async (e: React.FormEvent) => {
@@ -102,18 +135,27 @@ function App() {
     setNewComment('');
   };
 
+  const toggleFavorite = (topicId: string) => {
+    const updated = new Set(favorites);
+    if (updated.has(topicId)) {
+      updated.delete(topicId);
+    } else {
+      updated.add(topicId);
+    }
+    setFavorites(updated);
+  };
+
   const voteCounts = useMemo(() => {
-    const counts: Record<string, { votesA: number; votesB: number }> = {};
+    const counts: Record<string, { votesA: number; votesB: number; comments: number }> = {};
     topics.forEach((topic) => {
-      const votes = comments.filter(
-        (c) =>
-          c.topicId === topic.id &&
-          c.text.startsWith('선택') &&
-          (c.choice === 'A' || c.choice === 'B')
+      const topicComments = comments.filter((c) => c.topicId === topic.id);
+      const votes = topicComments.filter(
+        (c) => c.text.startsWith('선택') && (c.choice === 'A' || c.choice === 'B')
       );
       const votesA = votes.filter((c) => c.choice === 'A').length;
       const votesB = votes.filter((c) => c.choice === 'B').length;
-      counts[topic.id] = { votesA, votesB };
+      const commentsOnly = topicComments.filter((c) => !c.text.startsWith('선택')).length;
+      counts[topic.id] = { votesA, votesB, comments: commentsOnly };
     });
     return counts;
   }, [topics, comments]);
@@ -148,6 +190,9 @@ function App() {
               onVote={(choice) => handleVote(selectedTopic.id, choice)}
               totalVotesA={voteCounts[selectedTopic.id]?.votesA || 0}
               totalVotesB={voteCounts[selectedTopic.id]?.votesB || 0}
+              commentCount={voteCounts[selectedTopic.id]?.comments || 0}
+              isFavorite={favorites.has(selectedTopic.id)}
+              onToggleFavorite={() => toggleFavorite(selectedTopic.id)}
               onDiscuss={() => {}}
             />
 
@@ -195,6 +240,9 @@ function App() {
                   onVote={(choice) => handleVote(topic.id, choice)}
                   totalVotesA={voteCounts[topic.id]?.votesA || 0}
                   totalVotesB={voteCounts[topic.id]?.votesB || 0}
+                  commentCount={voteCounts[topic.id]?.comments || 0}
+                  isFavorite={favorites.has(topic.id)}
+                  onToggleFavorite={() => toggleFavorite(topic.id)}
                   onDiscuss={() => setSelectedTopic(topic)}
                 />
               ))}
