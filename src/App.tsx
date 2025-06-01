@@ -29,7 +29,7 @@ function App() {
       (snapshot) => {
         const data = snapshot.docs.map((doc) => ({
           ...(doc.data() as Topic),
-          id: doc.id, // 마지막에 배치
+          id: doc.id,
           createdAt: doc.data().createdAt?.toDate?.() ?? new Date(),
         }));
         setTopics(data);
@@ -44,7 +44,7 @@ function App() {
       (snapshot) => {
         const data = snapshot.docs.map((doc) => ({
           ...(doc.data() as Comment),
-          id: doc.id, // 이 줄을 마지막에 위치
+          id: doc.id,
           createdAt: doc.data().createdAt?.toDate?.() ?? new Date(),
         }));
         setComments(data);
@@ -66,7 +66,7 @@ function App() {
     if (!userEmail) return;
     await addDoc(collection(db, 'comments'), {
       topicId,
-      text: `Voted for option ${choice}`,
+      text: `선택 ${choice}에 투표함`,
       author: userEmail,
       choice,
       createdAt: serverTimestamp(),
@@ -108,7 +108,7 @@ function App() {
       const votes = comments.filter(
         (c) =>
           c.topicId === topic.id &&
-          c.text.startsWith('Voted for option') &&
+          c.text.startsWith('선택') &&
           (c.choice === 'A' || c.choice === 'B')
       );
       const votesA = votes.filter((c) => c.choice === 'A').length;
@@ -123,7 +123,7 @@ function App() {
       <header className="bg-white shadow-sm">
         <div className="max-w-4xl mx-auto px-4 py-6">
           <h1 className="text-3xl font-bold text-gray-900">
-            Would You Rather?
+            밸런스 게임
           </h1>
         </div>
       </header>
@@ -137,7 +137,7 @@ function App() {
               onClick={() => setSelectedTopic(null)}
               className="mb-4 text-blue-600 hover:text-blue-700"
             >
-              ← Back to topics
+              ← 질문 목록으로 돌아가기
             </button>
 
             <TopicCard
@@ -153,14 +153,14 @@ function App() {
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
                 className="w-full p-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Add your comment..."
+                placeholder="댓글을 입력하세요..."
                 rows={3}
               />
               <button
                 type="submit"
                 className="mt-2 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"
               >
-                Post Comment
+                댓글 작성
               </button>
             </form>
 
@@ -169,7 +169,7 @@ function App() {
                 .filter(
                   (c) =>
                     c.topicId === selectedTopic.id &&
-                    !c.text.startsWith('Voted for option')
+                    !c.text.startsWith('선택')
                 )
                 .map((comment) => (
                   <CommentCard

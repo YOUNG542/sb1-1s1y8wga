@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Topic } from '../types';
 import { MessageSquare } from 'lucide-react';
 
@@ -10,7 +10,13 @@ interface TopicCardProps {
   onDiscuss: () => void;
 }
 
-export function TopicCard({ topic, onVote, totalVotesA, totalVotesB, onDiscuss }: TopicCardProps) {
+export function TopicCard({
+  topic,
+  onVote,
+  totalVotesA,
+  totalVotesB,
+  onDiscuss,
+}: TopicCardProps) {
   const [votedOption, setVotedOption] = useState<'A' | 'B' | null>(() => {
     const savedVotes = localStorage.getItem('userVotes');
     if (savedVotes) {
@@ -28,8 +34,7 @@ export function TopicCard({ topic, onVote, totalVotesA, totalVotesB, onDiscuss }
     if (votedOption === null) {
       setVotedOption(choice);
       onVote(choice);
-      
-      // Save vote to localStorage
+
       const savedVotes = localStorage.getItem('userVotes');
       const votes = savedVotes ? JSON.parse(savedVotes) : {};
       votes[topic.id] = choice;
@@ -40,7 +45,7 @@ export function TopicCard({ topic, onVote, totalVotesA, totalVotesB, onDiscuss }
   return (
     <div className="bg-white rounded-lg shadow-md p-6 mb-6">
       <h2 className="text-2xl font-bold text-gray-800 mb-4">{topic.title}</h2>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         <button
           onClick={() => handleVote('A')}
@@ -55,7 +60,7 @@ export function TopicCard({ topic, onVote, totalVotesA, totalVotesB, onDiscuss }
         >
           <div className="font-semibold text-blue-700 mb-2">{topic.optionA}</div>
           <div className="text-sm text-blue-600">
-            {percentageA}% ({totalVotesA} votes)
+            {percentageA}% ({totalVotesA}표)
           </div>
         </button>
 
@@ -72,19 +77,19 @@ export function TopicCard({ topic, onVote, totalVotesA, totalVotesB, onDiscuss }
         >
           <div className="font-semibold text-purple-700 mb-2">{topic.optionB}</div>
           <div className="text-sm text-purple-600">
-            {percentageB}% ({totalVotesB} votes)
+            {percentageB}% ({totalVotesB}표)
           </div>
         </button>
       </div>
 
       <div className="flex justify-between items-center text-sm text-gray-600">
-      <div>Posted by Anonymous</div>
+        <div>작성자: 익명</div>
         <button
           onClick={onDiscuss}
           className="flex items-center gap-2 text-blue-600 hover:text-blue-700"
         >
           <MessageSquare className="w-4 h-4" />
-          Discuss
+          댓글 보기
         </button>
       </div>
     </div>

@@ -16,7 +16,7 @@ export function NewTopicForm({ onSubmit }: NewTopicFormProps) {
       title,
       optionA,
       optionB,
-      author: 'Anonymous', // For MVP, we'll use anonymous posting
+      author: '익명', // MVP 단계에서는 익명으로 작성
     });
     setTitle('');
     setOptionA('');
@@ -25,12 +25,12 @@ export function NewTopicForm({ onSubmit }: NewTopicFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6 mb-8">
-      <h2 className="text-xl font-bold text-gray-800 mb-4">Create New Topic</h2>
+      <h2 className="text-xl font-bold text-gray-800 mb-4">새 질문 만들기</h2>
       
       <div className="space-y-4">
         <div>
           <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
-            Question
+            질문 내용
           </label>
           <input
             type="text"
@@ -38,7 +38,7 @@ export function NewTopicForm({ onSubmit }: NewTopicFormProps) {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-            placeholder="Would you rather..."
+            placeholder="예: 차라리 월세 살기 vs 반지하 자가"
             required
           />
         </div>
@@ -46,7 +46,7 @@ export function NewTopicForm({ onSubmit }: NewTopicFormProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label htmlFor="optionA" className="block text-sm font-medium text-gray-700 mb-1">
-              Option A
+              선택지 A
             </label>
             <input
               type="text"
@@ -60,7 +60,7 @@ export function NewTopicForm({ onSubmit }: NewTopicFormProps) {
 
           <div>
             <label htmlFor="optionB" className="block text-sm font-medium text-gray-700 mb-1">
-              Option B
+              선택지 B
             </label>
             <input
               type="text"
@@ -77,7 +77,7 @@ export function NewTopicForm({ onSubmit }: NewTopicFormProps) {
           type="submit"
           className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"
         >
-          Create Topic
+          질문 등록하기
         </button>
       </div>
     </form>
