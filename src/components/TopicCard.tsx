@@ -78,7 +78,7 @@ export function TopicCard({ topic, onVote, totalVotesA, totalVotesB, onDiscuss }
       </div>
 
       <div className="flex justify-between items-center text-sm text-gray-600">
-        <div>Posted by {topic.author}</div>
+      <div>Posted by Anonymous</div>
         <button
           onClick={onDiscuss}
           className="flex items-center gap-2 text-blue-600 hover:text-blue-700"

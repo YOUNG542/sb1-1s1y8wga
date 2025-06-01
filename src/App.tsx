@@ -4,28 +4,19 @@ import { TopicCard } from './components/TopicCard';
 import { CommentCard } from './components/CommentCard';
 import { NewTopicForm } from './components/NewTopicForm';
 import { Login } from './components/Login';
+import { db } from './firebase';
+import {
+  collection,
+  onSnapshot,
+  addDoc,
+  serverTimestamp,
+  query,
+  orderBy,
+} from 'firebase/firestore';
 
 function App() {
-  const [topics, setTopics] = useState<Topic[]>(() => {
-    const savedTopics = localStorage.getItem('topics');
-    return savedTopics
-      ? JSON.parse(savedTopics).map((topic: any) => ({
-          ...topic,
-          createdAt: new Date(topic.createdAt),
-        }))
-      : [];
-  });
-
-  const [comments, setComments] = useState<Comment[]>(() => {
-    const savedComments = localStorage.getItem('comments');
-    return savedComments
-      ? JSON.parse(savedComments).map((comment: any) => ({
-          ...comment,
-          createdAt: new Date(comment.createdAt),
-        }))
-      : [];
-  });
-
+  const [topics, setTopics] = useState<Topic[]>([]);
+  const [comments, setComments] = useState<Comment[]>([]);
   const [selectedTopic, setSelectedTopic] = useState<Topic | null>(null);
   const [newComment, setNewComment] = useState('');
   const [userEmail, setUserEmail] = useState<string | null>(() => {
@@ -33,36 +24,54 @@ function App() {
   });
 
   useEffect(() => {
-    localStorage.setItem('topics', JSON.stringify(topics));
-  }, [topics]);
+    const unsubscribe = onSnapshot(
+      query(collection(db, 'topics'), orderBy('createdAt', 'desc')),
+      (snapshot) => {
+        const data = snapshot.docs.map((doc) => ({
+          ...(doc.data() as Topic),
+          id: doc.id, // 마지막에 배치
+          createdAt: doc.data().createdAt?.toDate?.() ?? new Date(),
+        }));
+        setTopics(data);
+      }
+    );
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
-    localStorage.setItem('comments', JSON.stringify(comments));
-  }, [comments]);
+    const unsubscribe = onSnapshot(
+      query(collection(db, 'comments'), orderBy('createdAt', 'desc')),
+      (snapshot) => {
+        const data = snapshot.docs.map((doc) => ({
+          ...(doc.data() as Comment),
+          id: doc.id, // 이 줄을 마지막에 위치
+          createdAt: doc.data().createdAt?.toDate?.() ?? new Date(),
+        }));
+        setComments(data);
+      }
+    );
+    return () => unsubscribe();
+  }, []);
 
-  const handleNewTopic = (topicData: Omit<Topic, 'id' | 'createdAt'>) => {
+  const handleNewTopic = async (topicData: Omit<Topic, 'id' | 'createdAt'>) => {
     if (!userEmail) return;
-    const newTopic: Topic = {
+    await addDoc(collection(db, 'topics'), {
       ...topicData,
-      id: Date.now().toString(),
-      createdAt: new Date(),
       author: userEmail,
-    };
-    setTopics([newTopic, ...topics]);
+      createdAt: serverTimestamp(),
+    });
   };
 
-  const handleVote = (topicId: string, choice: 'A' | 'B') => {
+  const handleVote = async (topicId: string, choice: 'A' | 'B') => {
     if (!userEmail) return;
-    const vote: Comment = {
-      id: Date.now().toString(),
+    await addDoc(collection(db, 'comments'), {
       topicId,
       text: `Voted for option ${choice}`,
       author: userEmail,
       choice,
-      createdAt: new Date(),
+      createdAt: serverTimestamp(),
       votes: 0,
-    };
-    setComments([vote, ...comments]);
+    });
   };
 
   const handleCommentVote = (commentId: string, vote: Vote) => {
@@ -79,19 +88,17 @@ function App() {
     );
   };
 
-  const handleAddComment = (e: React.FormEvent) => {
+  const handleAddComment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedTopic || !newComment.trim() || !userEmail) return;
 
-    const comment: Comment = {
-      id: Date.now().toString(),
+    await addDoc(collection(db, 'comments'), {
       topicId: selectedTopic.id,
       text: newComment,
       author: userEmail,
-      createdAt: new Date(),
+      createdAt: serverTimestamp(),
       votes: 0,
-    };
-    setComments([comment, ...comments]);
+    });
     setNewComment('');
   };
 
