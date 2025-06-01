@@ -15,6 +15,7 @@ import {
   query,
   orderBy,
 } from 'firebase/firestore';
+import { getAuth, signOut } from 'firebase/auth';
 
 function App() {
   const [topics, setTopics] = useState<Topic[]>([]);
@@ -64,6 +65,17 @@ function App() {
     return () => unsubscribe();
   }, []);
 
+  const handleLogout = async () => {
+    const auth = getAuth();
+    try {
+      await signOut(auth);
+      setUserEmail(null);
+      localStorage.removeItem('userEmail');
+    } catch (error) {
+      console.error('로그아웃 실패:', error);
+    }
+  };
+
   const handleNewTopic = async (topicData: Omit<Topic, 'id' | 'createdAt'>) => {
     if (!userEmail) return;
     await addDoc(collection(db, 'topics'), {
@@ -76,7 +88,6 @@ function App() {
   const handleVote = async (topicId: string, choice: 'A' | 'B') => {
     if (!userEmail) return;
 
-    const prevChoice = votedTopics[topicId];
     const existingVoteComment = comments.find(
       (c) =>
         c.topicId === topicId &&
@@ -171,13 +182,21 @@ function App() {
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white border-b-4 border-red-500 shadow-sm">
-        <div className="max-w-4xl mx-auto px-4 py-6 text-center">
+        <div className="max-w-4xl mx-auto px-4 py-6 text-center relative">
           <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight">
             밸런스 게임 - 너의 선택은?
           </h1>
           <p className="text-sm text-gray-500 mt-1">
             논쟁을 유도하는 양자택일, 익명으로 선택하고 말해보세요
           </p>
+          {userEmail && (
+            <button
+              onClick={handleLogout}
+              className="absolute top-6 right-4 text-sm text-red-600 hover:text-red-800"
+            >
+              로그아웃
+            </button>
+          )}
         </div>
       </header>
 
