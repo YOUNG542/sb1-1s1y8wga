@@ -28,7 +28,10 @@ function App() {
     const stored = localStorage.getItem('votedTopics');
     return stored ? JSON.parse(stored) : {};
   });
-  const [likedComments, setLikedComments] = useState<Record<string, boolean>>({});
+  const [likedComments, setLikedComments] = useState<Record<string, boolean>>(() => {
+    const stored = localStorage.getItem('likedComments');
+    return stored ? JSON.parse(stored) : {};
+  });
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
 
   useEffect(() => {
@@ -73,22 +76,16 @@ function App() {
   const handleVote = async (topicId: string, choice: 'A' | 'B') => {
     if (!userEmail) return;
 
-    if (votedTopics[topicId] === choice) {
-      const commentToDelete = comments.find(
-        (c) =>
-          c.topicId === topicId &&
-          c.text.startsWith('선택') &&
-          c.author === userEmail &&
-          c.choice === choice
-      );
-      if (commentToDelete) {
-        await deleteDoc(doc(db, 'comments', commentToDelete.id));
-      }
-      const updated = { ...votedTopics };
-      delete updated[topicId];
-      setVotedTopics(updated);
-      localStorage.setItem('votedTopics', JSON.stringify(updated));
-      return;
+    const prevChoice = votedTopics[topicId];
+    const existingVoteComment = comments.find(
+      (c) =>
+        c.topicId === topicId &&
+        c.text.startsWith('선택') &&
+        c.author === userEmail
+    );
+
+    if (existingVoteComment) {
+      await deleteDoc(doc(db, 'comments', existingVoteComment.id));
     }
 
     await addDoc(collection(db, 'comments'), {
@@ -106,19 +103,30 @@ function App() {
   };
 
   const handleCommentVote = (commentId: string, vote: Vote) => {
-    if (likedComments[commentId]) return;
+    const alreadyLiked = likedComments[commentId];
+    const updatedLiked = { ...likedComments };
+
     setComments(
       comments.map((comment) => {
         if (comment.id === commentId) {
+          const newVotes = comment.votes + (alreadyLiked ? (vote === 'up' ? -1 : 1) : (vote === 'up' ? 1 : -1));
           return {
             ...comment,
-            votes: comment.votes + (vote === 'up' ? 1 : -1),
+            votes: newVotes,
           };
         }
         return comment;
       })
     );
-    setLikedComments({ ...likedComments, [commentId]: true });
+
+    if (alreadyLiked) {
+      delete updatedLiked[commentId];
+    } else {
+      updatedLiked[commentId] = true;
+    }
+
+    setLikedComments(updatedLiked);
+    localStorage.setItem('likedComments', JSON.stringify(updatedLiked));
   };
 
   const handleAddComment = async (e: React.FormEvent) => {
