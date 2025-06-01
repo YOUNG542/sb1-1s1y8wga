@@ -101,7 +101,7 @@ export function TopicCard({
         >
           <MessageCircle className="w-4 h-4" /> 댓글 {commentCount}
         </button>
-        <span>작성자: {topic.author || '익명'}</span>
+        <span>작성자: 익명</span>
       </div>
     </div>
   );
