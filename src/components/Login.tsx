@@ -63,7 +63,7 @@ export function Login({ onLogin }: { onLogin: (user: string) => void }) {
           />
           <label htmlFor="agreement" className="text-sm text-gray-700">
             <span className="font-medium">[필수]</span> 본인은 본 서비스가 입력한 이메일 정보를
-            사용자 인증 및 간단한 통계 목적에 사용함에 동의합니다.
+            사용자 인증에 사용함에 동의합니다.
           </label>
         </div>
       )}
