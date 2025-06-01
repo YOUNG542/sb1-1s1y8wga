@@ -43,23 +43,25 @@ export function TopicCard({
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-      <h2 className="text-2xl font-bold text-gray-800 mb-4">{topic.title}</h2>
+    <div className="bg-white border-l-8 border-red-500 rounded-xl shadow-lg p-6 mb-6 hover:shadow-xl transition-shadow">
+      <h2 className="text-2xl font-extrabold text-center text-gray-900 mb-6 tracking-tight">
+        {topic.title}
+      </h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         <button
           onClick={() => handleVote('A')}
           disabled={votedOption !== null}
-          className={`p-4 rounded-lg transition-all duration-300 transform ${
-            votedOption === 'A'
-              ? 'bg-blue-100 scale-105 ring-2 ring-blue-500'
+          className={`p-6 text-xl font-semibold rounded-lg transition-all duration-300 transform text-white shadow-md
+            ${votedOption === 'A'
+              ? 'bg-blue-700 scale-105 ring-4 ring-blue-300'
               : votedOption === 'B'
-              ? 'bg-gray-50 opacity-75'
-              : 'bg-blue-50 hover:bg-blue-100 hover:scale-102'
-          }`}
+              ? 'bg-gray-200 text-gray-400'
+              : 'bg-blue-600 hover:bg-blue-700 hover:scale-105'}
+          `}
         >
-          <div className="font-semibold text-blue-700 mb-2">{topic.optionA}</div>
-          <div className="text-sm text-blue-600">
+          {topic.optionA}
+          <div className="text-sm mt-2 font-normal">
             {percentageA}% ({totalVotesA}표)
           </div>
         </button>
@@ -67,16 +69,16 @@ export function TopicCard({
         <button
           onClick={() => handleVote('B')}
           disabled={votedOption !== null}
-          className={`p-4 rounded-lg transition-all duration-300 transform ${
-            votedOption === 'B'
-              ? 'bg-purple-100 scale-105 ring-2 ring-purple-500'
+          className={`p-6 text-xl font-semibold rounded-lg transition-all duration-300 transform text-white shadow-md
+            ${votedOption === 'B'
+              ? 'bg-red-700 scale-105 ring-4 ring-red-300'
               : votedOption === 'A'
-              ? 'bg-gray-50 opacity-75'
-              : 'bg-purple-50 hover:bg-purple-100 hover:scale-102'
-          }`}
+              ? 'bg-gray-200 text-gray-400'
+              : 'bg-red-600 hover:bg-red-700 hover:scale-105'}
+          `}
         >
-          <div className="font-semibold text-purple-700 mb-2">{topic.optionB}</div>
-          <div className="text-sm text-purple-600">
+          {topic.optionB}
+          <div className="text-sm mt-2 font-normal">
             {percentageB}% ({totalVotesB}표)
           </div>
         </button>
@@ -86,10 +88,9 @@ export function TopicCard({
         <div>작성자: 익명</div>
         <button
           onClick={onDiscuss}
-          className="flex items-center gap-2 text-blue-600 hover:text-blue-700"
+          className="flex items-center gap-2 text-red-600 hover:text-red-700 font-semibold"
         >
-          <MessageSquare className="w-4 h-4" />
-          댓글 보기
+          <MessageSquare className="w-4 h-4" /> 댓글 보기
         </button>
       </div>
     </div>

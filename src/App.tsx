@@ -119,23 +119,26 @@ function App() {
   }, [topics, comments]);
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <header className="bg-white shadow-sm">
-        <div className="max-w-4xl mx-auto px-4 py-6">
-          <h1 className="text-3xl font-bold text-gray-900">
-            밸런스 게임
+    <div className="min-h-screen bg-gray-50">
+      <header className="bg-white border-b-4 border-red-500 shadow-sm">
+        <div className="max-w-4xl mx-auto px-4 py-6 text-center">
+          <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight">
+            밸런스 게임 - 너의 선택은?
           </h1>
+          <p className="text-sm text-gray-500 mt-1">
+            논쟁을 유도하는 양자택일, 익명으로 선택하고 말해보세요
+          </p>
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 py-8">
+      <main className="max-w-4xl mx-auto px-4 py-10">
         {!userEmail ? (
           <Login onLogin={setUserEmail} />
         ) : selectedTopic ? (
           <div>
             <button
               onClick={() => setSelectedTopic(null)}
-              className="mb-4 text-blue-600 hover:text-blue-700"
+              className="mb-4 text-sm text-red-600 hover:text-red-700"
             >
               ← 질문 목록으로 돌아가기
             </button>
@@ -152,13 +155,13 @@ function App() {
               <textarea
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                placeholder="댓글을 입력하세요..."
+                className="w-full p-3 border border-gray-300 rounded-md focus:ring-red-500 focus:border-red-500"
+                placeholder="당신의 의견을 남겨보세요..."
                 rows={3}
               />
               <button
                 type="submit"
-                className="mt-2 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"
+                className="mt-2 bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 transition-colors"
               >
                 댓글 작성
               </button>
@@ -184,7 +187,7 @@ function App() {
           <>
             <NewTopicForm onSubmit={handleNewTopic} />
 
-            <div>
+            <div className="space-y-6">
               {topics.map((topic) => (
                 <TopicCard
                   key={topic.id}
